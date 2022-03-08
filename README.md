@@ -17,12 +17,16 @@ The method is very important in industrial acoustic detection.
 ## Solution 
 ![img.png](img.png)
 <center>Figure: Flowchart of the scheme</center>
+
+
 1. First of all, normal and abnormal audio data can be used to train the feature extractor and extract the middle of the network
 Is used for subsequent training. Densenet-121, MobileNetV2 and Resnet-50 are available for this network
 And so on. (If abnormal audio data is low, abnormal data can be generated from normal data sets in a semi-supervised manner
 Train.)
+
 2. After getting the feature extractor, there is a feature, using AE autoencoder for training, training input number
 All data are normal data, and trained AE can reconstruct normal data with small error.
+
 3. Input the characteristics of the test data into the trained AE. If the error is within the threshold, the data is normal
 It's not normal. (Because in unsupervised anomaly detection, AE is first trained with normal data to encode solutions
 Code network to learn the expression of normal data, testing process so that the normal data can be reconstructed with a small error, and
