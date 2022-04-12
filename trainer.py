@@ -18,7 +18,7 @@ np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 64
 LR = 0.001
-EPOCHS = 200
+EPOCHS = 100
 train_dataset = DcaseDataMfcc(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
@@ -32,7 +32,8 @@ if torch.cuda.is_available():
     data = data.cuda()
 
 optimizer = torch.optim.Adam(net.parameters(), lr=LR)
-loss_f = nn.MSELoss()
+# loss_f = nn.MSELoss()
+loss_f = nn.BCELoss()
 if torch.cuda.is_available():
     loss_f = loss_f.cuda()
 
