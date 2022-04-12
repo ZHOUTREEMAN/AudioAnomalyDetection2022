@@ -10,6 +10,8 @@ import numpy as np
 from dataset_loaders import DcaseDataMfcc
 from deep_auto_encoder import AutoEncoder
 from torchsummary import summary
+import matplotlib
+matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 
 root_dir = 'data/pump_id00'
@@ -18,7 +20,7 @@ np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 64
 LR = 0.001
-EPOCHS = 100
+EPOCHS = 1000
 train_dataset = DcaseDataMfcc(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
@@ -52,7 +54,7 @@ for epoch in range(EPOCHS):
         print("----------------epoch:{} step:{} loss:{}----------------".format(epoch, step, loss))
         loss.backward()
         optimizer.step()
-        Loss_list.append(loss)
+        Loss_list.append(loss.cpu().detach().numpy())
 
         if step % 10 == 0:
             net.eval()
