@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
-# @Description：对数据进行增广，特别是正常音频数据
+# @Description：对数据进行增广，特别是异常的音频数据
 # @Author：XingZhou
 # @Time：2022/4/12 11:01
 # @Email：329201962@qq.com
+from math import ceil
+
 import librosa
+import random
+import soundfile
+import re
+import colorednoise as cn
+import numpy as np
+import data_input_helper
 from matplotlib import pyplot as plt
+from itertools import chain
 
 """
 Format                                   : Wave
@@ -25,6 +34,7 @@ Sampling rate                            : 8 000 Hz
 Bit depth                                : 16 bits
 Stream size                              : 85.3 KiB (100%)
 """
+
 
 # 对比不同数据的波形
 def demo_plot():
@@ -76,4 +86,124 @@ def demo_plot():
     plt.show()
 
 
-demo_plot()
+def random_int_list(start, stop, length):
+    start, stop = (int(start), int(stop)) if start <= stop else (int(stop), int(start))
+    length = int(abs(length)) if length else 0
+    random_list = []
+    for i in range(length):
+        random_list.append(random.randint(start, stop))
+    return random_list
+
+
+def random_enhance(data):
+    multiple = random_int_list(0, 5, len(data))
+    return np.multiply(multiple, data)
+
+
+def pink_noise(data):
+    beta = 1  # the exponent
+    samples = len(data)  # number of samples to generate
+    y = cn.powerlaw_psd_gaussian(beta, samples) * 0.1
+    return np.add(data, y)
+
+
+def sequential_shuffle(data, granularity):  # 粗粒度的shuffle 为的就是尽量不破环音频的平顺性,granularity为参与shuffle的切片个数
+    section = []
+    size = ceil(len(data) / granularity)
+    for i in range(0, int(len(data)) + 1, size):
+        c = data[i:i + size]
+        section.append(c)
+    np.random.shuffle(section)
+    return list(chain.from_iterable(section))
+
+
+def demo_get_anomaly():
+    audio = './data/noise/1/1487-867201051535215-20220325101238-13070100.wav'
+    y, sr = librosa.load(audio, sr=8000)
+    y_en = random_enhance(y)
+    y_no = pink_noise(y_en)
+    plt.subplot(311)
+    plt.plot(y)
+    plt.title('Original waveform')
+    plt.axis([0, 50000, -0.5, 0.5])
+    plt.subplot(312)
+    plt.plot(y_en)
+    plt.title('after random enhancement')
+    plt.axis([0, 50000, -0.5, 0.5])
+    plt.subplot(313)
+    plt.plot(y_no)
+    plt.title('after adding pink noise')
+    plt.axis([0, 50000, -0.5, 0.5])
+    plt.tight_layout()
+    plt.show()
+
+
+def demo_get_normal():
+    audio = './data/noise/1/1487-867201051535215-20220325101238-13070100.wav'
+    y, sr = librosa.load(audio, sr=8000)
+    y_shuffle = sequential_shuffle(y, 5)
+    plt.subplot(211)
+    plt.plot(y)
+    plt.title('Original waveform')
+    plt.axis([0, 50000, -0.5, 0.5])
+    plt.subplot(212)
+    plt.plot(y_shuffle)
+    plt.title('after sequential shuffle')
+    plt.axis([0, 50000, -0.5, 0.5])
+    plt.tight_layout()
+    plt.show()
+    return
+
+
+def get_anomaly():
+    old_data_list = []
+    root_dir = './data/noise/1'
+    target_dir = './data/noise/3'
+    data_input_helper.listdir(root_dir, old_data_list)
+    for item in old_data_list:
+        name = re.search("\d+-\d+-\d+-\d+", item).group()
+        tag_list = name.split('-')
+        y, sr = librosa.load(item, sr=8000)
+        y_en = random_enhance(y)
+        y_no = pink_noise(y_en)
+        file = target_dir + '/0000-' + tag_list[1] + '-' + tag_list[2] + '-3' + tag_list[3][1:] + '.wav'
+        soundfile.write(file, y_no, 8000)
+    return
+
+
+def get_anomaly2():
+    old_data_list = []
+    root_dir = './data/noise/3'
+    data_input_helper.listdir(root_dir, old_data_list)
+    for item in old_data_list:
+        name = re.search("\d+-\d+-\d+-\d+", item).group()
+        tag_list = name.split('-')
+        if tag_list[0]=="0000":
+            continue
+        y, sr = librosa.load(item, sr=8000)
+        y_shuffle = sequential_shuffle(y, 5)
+        file = root_dir + '/1111-' + tag_list[1] + '-' + tag_list[2] + '-3' + tag_list[3][1:] + '.wav'
+        soundfile.write(file, y_shuffle, 8000)
+    return
+
+
+def get_normal():
+    old_data_list = []
+    root_dir = './data/noise/1'
+    data_input_helper.listdir(root_dir, old_data_list)
+    for item in old_data_list:
+        name = re.search("\d+-\d+-\d+-\d+", item).group()
+        tag_list = name.split('-')
+        y, sr = librosa.load(item, sr=8000)
+        y_shuffle = sequential_shuffle(y, 5)
+        file = root_dir + '/1111-' + tag_list[1] + '-' + tag_list[2] + '-1' + tag_list[3][1:] + '.wav'
+        soundfile.write(file, y_shuffle, 8000)
+    return
+
+
+# demo_plot()
+# demo_get_anomaly()
+# demo_get_normal()
+# get_anomaly()
+# get_normal()
+get_anomaly2()
