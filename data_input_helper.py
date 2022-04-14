@@ -52,7 +52,9 @@ def extract_feature_gfcc(filename):
 
 
 def get_features_mfcc(filenames):
-    features = np.empty((0, 40, 431))
+    shape = extract_feature_mfcc(filenames[0]).shape
+    features = np.empty((0, shape[0], shape[1]))
+    # features = np.empty((0, 40, 431))
     for filename in (filenames):
         mfccs = extract_feature_mfcc(filename)
         features = np.append(features, mfccs[None], axis=0)
@@ -60,7 +62,9 @@ def get_features_mfcc(filenames):
 
 
 def get_features_gfcc(filenames):
-    features = np.empty((0, 1000, 13))
+    shape = extract_feature_mfcc(filenames[0]).shape
+    features = np.empty((0, shape[0], shape[1]))
+    # features = np.empty((0, 1000, 13))
     for filename in (filenames):
         gfccs = extract_feature_gfcc(filename)
         features = np.append(features, gfccs[None], axis=0)
@@ -86,3 +90,5 @@ def get_labels(filename):
             labels.append(number)
     f.close()
     return np.array(labels, dtype=np.int)
+
+
