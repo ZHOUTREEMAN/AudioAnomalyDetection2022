@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
-from dataset_loaders import DcaseDataMfcc
+from dataset_loaders import  WaterPipeDataMfcc
 from deep_auto_encoder import AutoEncoder
 
 root_dir = 'data/noise_after'
@@ -15,7 +15,7 @@ np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 1
 
-train_dataset = DcaseDataMfcc(root_dir, train_dir)
+train_dataset = WaterPipeDataMfcc(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
 net = torch.load("./model/noise_deep_auto_encoder_epoch1000_batch64.pth")
@@ -32,8 +32,8 @@ loss_set = []
 net.eval()
 for step, (x, _) in enumerate(train_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 43, 431)))
-        data.data.resize_(x.size()).copy_(x)
+        x = torch.reshape(x, ((1, 1, 44, 236)))
+        data.resize_(x.size()).copy_(x)
         code, decoded = net(data)
         loss = loss_f(decoded, data)
         loss_set.append(loss.cpu().detach().numpy())

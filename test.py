@@ -6,17 +6,17 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-from dataset_loaders import DcaseDataMfcc
+from dataset_loaders import  WaterPipeDataMfcc
 from deep_auto_encoder import AutoEncoder
 from torch.autograd import Variable
 
 BATCH_SIZE = 1
-root_dir = 'data/pump_id00'
+root_dir = 'data/noise_after'
 test_dir = 'test'
 threshold = np.load('./model/threshold.npy')
-test_dataset = DcaseDataMfcc(root_dir, test_dir)
+test_dataset = WaterPipeDataMfcc(root_dir, test_dir)
 test_loader = DataLoader(test_dataset, BATCH_SIZE)
-model = torch.load("./model/deep_auto_encoder_epoch200_batch64.pth")
+model = torch.load("./model/noise_deep_auto_encoder_epoch1000_batch64.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
@@ -41,17 +41,17 @@ outputs = []
 loss_set = []
 for step, (x, tag) in enumerate(test_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 43, 431)))
-        data.data.resize_(x.size()).copy_(x)
+        x = torch.reshape(x, ((1, 1, 44, 236)))
+        data.resize_(x.size()).copy_(x)
         code, decoded = net(data)
         loss = loss_f(decoded, data)
         loss = loss.cpu().detach().numpy()
         loss_set.append(loss)
         output = ""
         if loss > threshold:
-            output = "anomal"
+            output = "3"
         else:
-            output = "normal"
+            output = "1"
         tag = tag[0]
         correct = correct + check_tag(output, tag)
         tags.append(tag)
