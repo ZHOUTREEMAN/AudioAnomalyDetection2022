@@ -36,7 +36,7 @@ def load_clip(filename):
 # 提取片段的mfcc并进行normalization。
 def extract_feature_mfcc(filename):
     x, sr = load_clip(filename)
-    mfccs = librosa.feature.mfcc(y=x, sr=sr, n_mfcc=43)
+    mfccs = librosa.feature.mfcc(y=x, sr=sr, n_mfcc=44)
     norm_mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
     return norm_mfccs
 

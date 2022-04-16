@@ -9,8 +9,8 @@ from torch.autograd import Variable
 from dataset_loaders import DcaseDataMfcc
 from deep_auto_encoder import AutoEncoder
 
-root_dir = 'data/pump_id00'
-train_dir = 'train'
+root_dir = 'data/noise_after'
+train_dir = 'threshold'
 np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 1
@@ -18,7 +18,7 @@ BATCH_SIZE = 1
 train_dataset = DcaseDataMfcc(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
-net = torch.load("./model/deep_auto_encoder_epoch200_batch64.pth")
+net = torch.load("./model/noise_deep_auto_encoder_epoch1000_batch64.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()

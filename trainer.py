@@ -3,6 +3,7 @@
 # @Author : XingZhou
 # @Email : 329201962@qq.com
 import torch
+from numpy import shape
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
@@ -14,7 +15,7 @@ import matplotlib
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 
-root_dir = 'data/pump_id00'
+root_dir = 'data/noise_after'
 train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
@@ -34,19 +35,19 @@ if torch.cuda.is_available():
     data = data.cuda()
 
 optimizer = torch.optim.Adam(net.parameters(), lr=LR)
-# loss_f = nn.MSELoss()
-loss_f = nn.BCELoss()
+loss_f = nn.MSELoss()
+# loss_f = nn.BCELoss()
 if torch.cuda.is_available():
     loss_f = loss_f.cuda()
 
-summary(net, input_size=(1, 43, 431), batch_size=64, device="cuda")
+summary(net, input_size=(1, 44, 236), batch_size=64, device="cuda")
 Loss_list_epoch = []
 
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
     for step, (x, _) in enumerate(train_loader, 1):
-        x = torch.reshape(x, ((64, 1, 43, 431)))
+        x = torch.reshape(x, ((64, 1, 44, 236)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
         code, decoded = net(data)
@@ -59,7 +60,7 @@ for epoch in range(EPOCHS):
         if step % 10 == 0:
             net.eval()
             eps = Variable(inputs)
-            eps = torch.reshape(eps, ((64, 1, 43, 431)))
+            eps = torch.reshape(eps, ((64, 1, 44, 236)))
             eps = eps.type(torch.FloatTensor)
             if torch.cuda.is_available():
                 eps = eps.cuda()
