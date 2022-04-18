@@ -202,8 +202,8 @@ def get_normal():
 
 
 # demo_plot()
-# demo_get_anomaly()
+demo_get_anomaly()
 # demo_get_normal()
 # get_anomaly()
 # get_normal()
-get_anomaly2()
+# get_anomaly2()
