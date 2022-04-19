@@ -14,8 +14,6 @@ from spafe.features.gfcc import gfcc
 
 
 # 获取文件夹中所有文件的路径传入存储的list
-
-
 def listdir(path, list_name):
     for file in os.listdir(path):
         file_path = os.path.join(path, file)
@@ -25,9 +23,9 @@ def listdir(path, list_name):
             list_name.append(file_path)
 
 
-# 用于读取音频片段，库里的片段几乎都是10s，若小于10秒，将它们补零。采样率11025，10秒一共110250个采样点。
+# 用于读取音频片段，库里的片段几乎都是相同时间长度，若小于，将它们补零。采样率r，s秒一共r*s(110250)个采样点。
 def load_clip(filename):
-    x, sr = librosa.load(filename)
+    x, sr = librosa.load(filename, sr=8000)
     # x = np.pad(x,(0,110250-x.shape[0]),'constant')
     x = np.array(x).astype(float)
     return x, sr
@@ -90,5 +88,3 @@ def get_labels(filename):
             labels.append(number)
     f.close()
     return np.array(labels, dtype=np.int)
-
-

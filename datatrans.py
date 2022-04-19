@@ -47,7 +47,7 @@ def datatrans0407():
             target = np.copy(y1)
             img0 = generate_anomaly_sound.to_img2(target)
             plt.axis("off")
-            plt.title(it.values[0][5])
+            plt.title('label:'+str(it.values[0][5]))
             plt.imshow(img0)
             plt.savefig(newname2)
 
@@ -57,34 +57,32 @@ def datatrans0418(label_excel, data_root):
     data_raw_list = []
     root_dir = data_root
     data_input_helper.listdir(root_dir, data_raw_list)
-    # os.mkdir(root_dir + '/1')
-    # os.mkdir(root_dir + '/2')
-    # os.mkdir(root_dir + '/3')
-    # os.mkdir(root_dir + '/pic1')
-    # os.mkdir(root_dir + '/pic2')
-    # os.mkdir(root_dir + '/pic3')
+    os.mkdir(root_dir + '/1')
+    os.mkdir(root_dir + '/2')
+    os.mkdir(root_dir + '/3')
+    os.mkdir(root_dir + '/pic1')
+    os.mkdir(root_dir + '/pic2')
+    os.mkdir(root_dir + '/pic3')
     for raw_item in data_raw_list:
-        print(raw_item)
-        name = re.search("\d+-\d+-\d +-?\d+", raw_item).group()
-        print(name)
-        # tag_list = name.split('-')
-        # it = data[data['文件名称'] == name]
-        # if it.values.size != 0:
-        #     # 设置新文件名
-        #     newname = root_dir + '/' + str(it.values[0][5]) + '/' + tag_list[0] + '-' + tag_list[1] + '-' + tag_list[
-        #         2] + '-' + str(it.values[0][5]) + str(it.values[0][6]) + "{:0>2d}".format(
-        #         it.values[0][4]) + "{:0>4d}".format(it.values[0][3]) + '.wav'
-        #     newname2 = root_dir + '/' + 'pic' + str(it.values[0][5]) + '/' + tag_list[0] + '-' + tag_list[1] + '-' + \
-        #                tag_list[2] + '-' + str(it.values[0][5]) + str(it.values[0][6]) + "{:0>2d}".format(
-        #         it.values[0][4]) + "{:0>4d}".format(it.values[0][3]) + '.png'
-        #     shutil.copy(raw_item, newname)
-        #     y1, sr1 = librosa.load(raw_item, sr=8000)
-        #     target = np.copy(y1)
-        #     img0 = generate_anomaly_sound.to_img2(target)
-        #     plt.axis("off")
-        #     plt.title(it.values[0][5])
-        #     plt.imshow(img0)
-        #     plt.savefig(newname2)
+        name = re.search("\d+-\d+-\d+-?\d+", raw_item).group()
+        tag_list = name.split('-')
+        it = data[data['文件名称'] == name]
+        if it.values.size != 0:
+            # 设置新文件名
+            newname = root_dir + '/' + str(it.values[0][4]) + '/' + tag_list[0] + '-' + tag_list[1] + '-' + tag_list[
+                2] + '-' + str(it.values[0][4]) + str(it.values[0][5]) + "{:0>2d}".format(
+                it.values[0][6]) + "{:0>4d}".format(it.values[0][7]) + '.wav'
+            newname2 = root_dir + '/' + 'pic' + str(it.values[0][4]) + '/' + tag_list[0] + '-' + tag_list[1] + '-' + \
+                       tag_list[2] + '-' + str(it.values[0][4]) + str(it.values[0][5]) + "{:0>2d}".format(
+                it.values[0][6]) + "{:0>4d}".format(it.values[0][7]) + '.png'
+            shutil.copy(raw_item, newname)
+            y1, sr1 = librosa.load(raw_item, sr=8000)
+            target = np.copy(y1)
+            img0 = generate_anomaly_sound.to_img2(target)
+            plt.axis("off")
+            plt.title('label:'+str(it.values[0][4])+'alarm value:'+str(it.values[0][2]))
+            plt.imshow(img0)
+            plt.savefig(newname2)
 
 
 if __name__ == "__main__":

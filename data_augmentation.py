@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Description：对数据进行增广，特别是异常的音频数据
+# @Description：对数据进行增广，其中demo开头的函数都是用于绘图直观比较的函数不做批处理工作
 # @Author：XingZhou
 # @Time：2022/4/12 11:01
 # @Email：329201962@qq.com
@@ -16,6 +16,7 @@ from matplotlib import pyplot as plt
 from itertools import chain
 
 """
+原始数据的格式
 Format                                   : Wave
 File size                                : 85.4 KiB
 Duration                                 : 5 s 460 ms
@@ -33,6 +34,23 @@ Channel(s)                               : 1 channel
 Sampling rate                            : 8 000 Hz
 Bit depth                                : 16 bits
 Stream size                              : 85.3 KiB (100%)
+
+例如：11-865057047734730-20211224115359-12030200.wav
+记录点编号：11
+数据时间：21年12月24日11时53分59秒
+漏损情况 1：无漏
+噪声级别 2：2级
+水管材料 03：钢塑管
+水管口径 0200：200mm
+
+漏损情况：
+'1、无漏 2、疑似漏点 3、存在漏点
+现场噪声级别：（5级噪声最大）
+'1、一级 2、二级 3、三级 4、四级 5、五级
+管材：
+'1、球墨铸铁管 2、钢管 3、钢塑管 4、PE管 5、PPR管 6、镀锌管 7、铸铁管 8、自应力管(水泥管) '
+口径：
+40，50，80，100，150.....1800mm
 """
 
 
@@ -155,10 +173,10 @@ def demo_get_normal():
     return
 
 
-def get_anomaly():
+def get_anomaly(root, target):  # 通过先随机增强再加粉噪的方式进行异常数据的生成
     old_data_list = []
-    root_dir = './data/noise/1'
-    target_dir = './data/noise/3'
+    root_dir = root
+    target_dir = target
     data_input_helper.listdir(root_dir, old_data_list)
     for item in old_data_list:
         name = re.search("\d+-\d+-\d+-\d+", item).group()
@@ -171,14 +189,14 @@ def get_anomaly():
     return
 
 
-def get_anomaly2():
+def get_anomaly2(root_target):  # 进行粗粒度的shuffle得到的新的异常数据
     old_data_list = []
-    root_dir = './data/noise/3'
+    root_dir = root_target
     data_input_helper.listdir(root_dir, old_data_list)
     for item in old_data_list:
         name = re.search("\d+-\d+-\d+-\d+", item).group()
         tag_list = name.split('-')
-        if tag_list[0]=="0000":
+        if tag_list[0] == "0000":
             continue
         y, sr = librosa.load(item, sr=8000)
         y_shuffle = sequential_shuffle(y, 5)
@@ -187,9 +205,9 @@ def get_anomaly2():
     return
 
 
-def get_normal():
+def get_normal(root_target):  # 进行粗粒度的shuffle得到的新的正常数据
     old_data_list = []
-    root_dir = './data/noise/1'
+    root_dir = root_target
     data_input_helper.listdir(root_dir, old_data_list)
     for item in old_data_list:
         name = re.search("\d+-\d+-\d+-\d+", item).group()
@@ -201,9 +219,5 @@ def get_normal():
     return
 
 
-# demo_plot()
-demo_get_anomaly()
-# demo_get_normal()
-# get_anomaly()
-# get_normal()
-# get_anomaly2()
+if __name__ == "__main__":
+    demo_get_anomaly()
