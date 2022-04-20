@@ -2,7 +2,8 @@
 # @Time : 2021/12/8 16:51
 # @Author : XingZhou
 # @Email : 329201962@qq.com
-
+import cv2
+import sklearn
 from torch.utils.data.dataset import Dataset
 import os
 import data_input_helper
@@ -121,7 +122,7 @@ class DaHenDataGfcc(Dataset):
         return len(self.data_path)
 
 
-class WaterPipeData(Dataset):
+class WaterPipeData(Dataset):  # 直接将原始数据的短时傅里叶变化后直接作为网络输入
     def __init__(self, root_dir, sub_dir):
         self.root_dir = root_dir
         self.sub_dir = sub_dir
@@ -134,10 +135,12 @@ class WaterPipeData(Dataset):
         x, sr = data_input_helper.load_clip(data_item_path)
         # 时变频谱图
         # 调用librosa的stft方法可以直接得到短时傅里叶变换的结果
-        stftX = librosa.stft(x)
+        stftX = librosa.stft(x, n_fft=512, hop_length=256)
         # 把幅度转成分贝格式
         Xdb = librosa.amplitude_to_db(abs(stftX))
-        return Xdb, data_name[-12]
+        Xdb_re = cv2.resize(Xdb, (224, 224))
+        Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=1)
+        return Xdb_norma, data_name[-12]
 
     def __len__(self):
         return len(self.data_path)
