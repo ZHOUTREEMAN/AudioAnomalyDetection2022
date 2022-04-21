@@ -8,7 +8,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 import numpy as np
-from dataset_loaders import DcaseDataMfcc
+from dataset_loaders import WaterPipeData
 from deep_auto_encoder import AutoEncoder
 from torchsummary import summary
 import matplotlib
@@ -22,7 +22,7 @@ torch.manual_seed(123)
 BATCH_SIZE = 64
 LR = 0.001
 EPOCHS = 1000
-train_dataset = DcaseDataMfcc(root_dir, train_dir)
+train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
 dataiter = iter(train_loader)
@@ -40,14 +40,14 @@ loss_f = nn.MSELoss()
 if torch.cuda.is_available():
     loss_f = loss_f.cuda()
 
-summary(net, input_size=(1, 44, 236), batch_size=64, device="cuda")
+summary(net, input_size=(1, 224, 224), batch_size=64, device="cuda")
 Loss_list_epoch = []
 
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
     for step, (x, _) in enumerate(train_loader, 1):
-        x = torch.reshape(x, ((64, 1, 44, 236)))
+        x = torch.reshape(x, ((64, 1, 224, 224)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
         code, decoded = net(data)
@@ -60,7 +60,7 @@ for epoch in range(EPOCHS):
         if step % 10 == 0:
             net.eval()
             eps = Variable(inputs)
-            eps = torch.reshape(eps, ((64, 1, 44, 236)))
+            eps = torch.reshape(eps, ((64, 1, 224, 224)))
             eps = eps.type(torch.FloatTensor)
             if torch.cuda.is_available():
                 eps = eps.cuda()

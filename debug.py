@@ -20,8 +20,8 @@ class AutoEncoder(nn.Module):
         self.connv2 = nn.Conv2d(16, 32, 3, 2, 0)
         self.connv3 = nn.Conv2d(32, 16, 2, 1, 0)
 
-        self.en_fc = nn.Linear(16 * 9 * 57, HIDDEN_SIZE)
-        self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 9 * 57)
+        self.en_fc = nn.Linear(16 * 54 * 54, HIDDEN_SIZE)
+        self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 54 * 54)
 
         self.deconv1 = nn.ConvTranspose2d(16, 32, 2, 1, 0, 0)
         self.deconv2 = nn.ConvTranspose2d(32, 16, 3, 2, 0, 0)
@@ -46,7 +46,7 @@ class AutoEncoder(nn.Module):
         code = self.en_fc(en.view(en.size(0), -1))
         de = self.de_fc(code)
 
-        de = self.deconv1(de.view(de.size(0), 16, 9 , 57))
+        de = self.deconv1(de.view(de.size(0), 16, 54 , 54))
         de = self.batchNorm32(de)
         de = self.tan(de)
         de = self.deconv2(de)
@@ -58,7 +58,7 @@ class AutoEncoder(nn.Module):
 
 
 net = AutoEncoder()
-input = torch.Tensor(64, 1, 44, 236)
+input = torch.Tensor(64, 1, 224, 224)
 print(input.size())
 code, output = net(input)
 print(output.size())

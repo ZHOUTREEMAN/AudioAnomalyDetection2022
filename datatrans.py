@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# @Description：将每条数据根据excel文件分类并打上标签,并绘制出短时傅里叶变化后的图像以便进行初步的分析
+# @Description：将每条数据根据excel文件分类并打上标签,并绘制出短时傅里叶变化后的图像以便进行初步的分析，并将用于训练模型的数据集划分好
 # @Time : 2022/04/11 14:13
 # @Author : XingZhou
 # @Email : 329201962@qq.com
 import os
+import random
 import re
 import shutil
 
@@ -14,7 +15,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 import data_input_helper
-import generate_anomaly_sound
+from data_augmentation import to_img2
 
 matplotlib.use('Agg')
 
@@ -45,9 +46,9 @@ def datatrans0407():
             shutil.copy(raw_item, newname)
             y1, sr1 = librosa.load(raw_item, sr=8000)
             target = np.copy(y1)
-            img0 = generate_anomaly_sound.to_img2(target)
+            img0 = to_img2(target)
             plt.axis("off")
-            plt.title('label:'+str(it.values[0][5]))
+            plt.title('label:' + str(it.values[0][5]))
             plt.imshow(img0)
             plt.savefig(newname2)
 
@@ -78,12 +79,44 @@ def datatrans0418(label_excel, data_root):
             shutil.copy(raw_item, newname)
             y1, sr1 = librosa.load(raw_item, sr=8000)
             target = np.copy(y1)
-            img0 = generate_anomaly_sound.to_img2(target)
+            img0 = to_img2(target)
             plt.axis("off")
-            plt.title('label:'+str(it.values[0][4])+'alarm value:'+str(it.values[0][2]))
+            plt.title('label:' + str(it.values[0][4]) + 'alarm value:' + str(it.values[0][2]))
             plt.imshow(img0)
             plt.savefig(newname2)
 
 
+# srcfile 需要复制、移动的文件  dstpath 目的地址
+def my_copyfile(srcfile, dstpath):  # 复制函数
+    if not os.path.isfile(srcfile):
+        print("%s not exist!" % (srcfile))
+    else:
+        fpath, fname = os.path.split(srcfile)  # 分离文件名和路径
+        if not os.path.exists(dstpath):
+            os.makedirs(dstpath)  # 创建路径
+        shutil.copy(srcfile, dstpath + fname)  # 复制文件
+
+
+def after_dataset(root, destination):  # 生成after数据集用于网络训练，其中包括三个子集合，分别为训练、测试以及阈值获取
+    data_list_1 = []
+    data_list_2 = []
+    data_list_3 = []
+    data_input_helper.listdir(root + '/1', data_list_1)
+    data_input_helper.listdir(root + '/2', data_list_2)
+    data_input_helper.listdir(root + '/3', data_list_3)
+    random.shuffle(data_list_1)
+    for index, data_it in enumerate(data_list_1):
+        if index % 10 == 0:
+            my_copyfile(data_it, destination + '/test/')
+        elif index % 10 == 1 or index % 10 == 2:
+            my_copyfile(data_it, destination + '/threshold/')
+        else:
+            my_copyfile(data_it, destination + '/train/')
+    for data_item in data_list_3:
+        my_copyfile(data_item, destination + '/test/')
+    return
+
+
 if __name__ == "__main__":
-    datatrans0418(r'./data/mark/label0418.xlsx', './data/noise0418')
+    # datatrans0418(r'./data/mark/label0418.xlsx', './data/noise0418')
+    after_dataset('./data/noise0418', './data/noise_after')

@@ -363,4 +363,5 @@ def demo_transfer():
 
 
 if __name__ == "__main__":
-    demo_get_anomaly()
+    get_anomaly2("./data/noise0418/3")
+    get_normal("./data/noise0418/1")

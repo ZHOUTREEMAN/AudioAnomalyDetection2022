@@ -22,8 +22,8 @@ class AutoEncoder(nn.Module):
             nn.BatchNorm2d(16),
             nn.Tanh()
         )
-        self.en_fc = nn.Linear(16 * 9 * 57, HIDDEN_SIZE)
-        self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 9 * 57)
+        self.en_fc = nn.Linear(16 * 54 * 54, HIDDEN_SIZE)
+        self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 54 * 54)
         self.de_conv = nn.Sequential(
             nn.ConvTranspose2d(16, 32, 2, 1, 0, 0),
             nn.BatchNorm2d(32),
@@ -39,5 +39,5 @@ class AutoEncoder(nn.Module):
         en = self.en_conv(x)
         code = self.en_fc(en.view(en.size(0), -1))
         de = self.de_fc(code)
-        decoded = self.de_conv(de.view(de.size(0), 16, 9, 57))
+        decoded = self.de_conv(de.view(de.size(0), 16, 54, 54))
         return code, decoded
