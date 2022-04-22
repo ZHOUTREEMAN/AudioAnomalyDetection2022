@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-# @Time : 2021/12/8 19:08
-# @Author : XingZhou
-# @Email : 329201962@qq.com
+# @Description：用于vae的训练类
+# @Author：XingZhou
+# @Time：2022/4/22 15:44
+# @Email：329201962@qq.com
 import torch
 from numpy import shape
 from torch import nn
@@ -9,9 +10,11 @@ from torch.utils.data import DataLoader
 from torch.autograd import Variable
 import numpy as np
 from dataset_loaders import WaterPipeData
-from deep_auto_encoder import AutoEncoder
 from torchsummary import summary
 import matplotlib
+
+from variational_auto_encoder import Autoencoder
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 
@@ -22,12 +25,20 @@ torch.manual_seed(123)
 BATCH_SIZE = 64
 LR = 0.001
 EPOCHS = 3000
+
+latent_length = 30
+input_size = 224 * 224
+hidden1 = 128
+hidden2 = 128
+hidden3 = 64
+hidden4 = 64
+
 train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
 dataiter = iter(train_loader)
 inputs, labels = dataiter.next()
-net = AutoEncoder()
+net = Autoencoder(input_size, hidden1, hidden2, hidden3, hidden4, latent_length)
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 if torch.cuda.is_available():
@@ -36,39 +47,26 @@ if torch.cuda.is_available():
 
 optimizer = torch.optim.Adam(net.parameters(), lr=LR)
 loss_f = nn.MSELoss()
-# loss_f = nn.BCELoss()
 if torch.cuda.is_available():
     loss_f = loss_f.cuda()
 
-summary(net, input_size=(1, 224, 224), batch_size=64, device="cuda")
+summary(net, input_size=(1, 224 * 224), batch_size=64, device="cuda")
 Loss_list_epoch = []
 
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
     for step, (x, _) in enumerate(train_loader, 1):
-        x = torch.reshape(x, ((64, 1, 224, 224)))
+        x = torch.reshape(x, ((64, 1, 224 * 224)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
-        code, decoded = net(data)
-        loss = loss_f(decoded, data)
+        decoded , latent, latent_mean, latent_logvar= net(data)
+        kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
+        loss = loss_f(decoded, data)+kl_loss
         print("----------------epoch:{} step:{} loss:{}----------------".format(epoch, step, loss))
         loss.backward()
         optimizer.step()
         Loss_list.append(loss.cpu().detach().numpy())
-
-        if step % 10 == 0:
-            net.eval()
-            eps = Variable(inputs)
-            eps = torch.reshape(eps, ((64, 1, 224, 224)))
-            eps = eps.type(torch.FloatTensor)
-            if torch.cuda.is_available():
-                eps = eps.cuda()
-            tags, fake = net(eps)
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, step * len(data), len(train_loader.dataset),
-                       100. * step / len(train_loader),
-                loss.item()))
     Loss_list_epoch.append(Loss_list[-1])
 
 x = range(1, len(Loss_list_epoch) + 1)
@@ -78,6 +76,9 @@ plt_title = 'EPOCHS = {}; BATCH_SIZE = {}; LEARNING_RATE:{}'.format(EPOCHS, BATC
 plt.title(plt_title)
 plt.xlabel('per epoch')
 plt.ylabel('loss')
-plt.savefig("./log/loss_all.jpg")
+plt.savefig("./log/loss_all_vae.jpg")
 print("task over,saving model......")
-torch.save(net, "./model/noise_deep_auto_encoder_epoch{}_batch{}.pth".format(EPOCHS, BATCH_SIZE))
+torch.save(net, "./model/noise_vae_auto_encoder_epoch{}_batch{}.pth".format(EPOCHS, BATCH_SIZE))
+
+
+

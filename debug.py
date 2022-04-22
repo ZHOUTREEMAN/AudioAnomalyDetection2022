@@ -10,54 +10,65 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from variational_auto_encoder import Autoencoder
+
 HIDDEN_SIZE = 40
 
 
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
-        self.connv1 = nn.Conv2d(1, 16, 4, 2, 0)
-        self.connv2 = nn.Conv2d(16, 32, 3, 2, 0)
-        self.connv3 = nn.Conv2d(32, 16, 2, 1, 0)
-
-        self.en_fc = nn.Linear(16 * 54 * 54, HIDDEN_SIZE)
-        self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 54 * 54)
-
-        self.deconv1 = nn.ConvTranspose2d(16, 32, 2, 1, 0, 0)
-        self.deconv2 = nn.ConvTranspose2d(32, 16, 3, 2, 0, 0)
-        self.deconv3 = nn.ConvTranspose2d(16, 1, 4, 2, 0, 0)
-
-        self.sig = nn.Sigmoid()
-        self.tan = nn.Tanh()
-        self.batchNorm16 = nn.BatchNorm2d(16)
-        self.batchNorm32 = nn.BatchNorm2d(32)
+        # self.connv1 = nn.Conv2d(1, 16, 4, 2, 0)
+        # self.connv2 = nn.Conv2d(16, 32, 3, 2, 0)
+        # self.connv3 = nn.Conv2d(32, 16, 2, 1, 0)
+        #
+        # self.en_fc = nn.Linear(16 * 54 * 54, HIDDEN_SIZE)
+        # self.de_fc = nn.Linear(HIDDEN_SIZE, 16 * 54 * 54)
+        #
+        # self.deconv1 = nn.ConvTranspose2d(16, 32, 2, 1, 0, 0)
+        # self.deconv2 = nn.ConvTranspose2d(32, 16, 3, 2, 0, 0)
+        # self.deconv3 = nn.ConvTranspose2d(16, 1, 4, 2, 0, 0)
+        #
+        # self.sig = nn.Sigmoid()
+        # self.tan = nn.Tanh()
+        # self.batchNorm16 = nn.BatchNorm2d(16)
+        # self.batchNorm32 = nn.BatchNorm2d(32)
+        self.input_to_hidden1 = nn.Linear(224, 128)
 
     def forward(self, x):
-        en = self.connv1(x)
-        en = self.batchNorm16(en)
-        en = self.tan(en)
-        en = self.connv2(en)
-        en = self.batchNorm32(en)
-        en = self.tan(en)
-        en = self.connv3(en)
-        en = self.batchNorm16(en)
-        en = self.tan(en)
-
-        code = self.en_fc(en.view(en.size(0), -1))
-        de = self.de_fc(code)
-
-        de = self.deconv1(de.view(de.size(0), 16, 54 , 54))
-        de = self.batchNorm32(de)
-        de = self.tan(de)
-        de = self.deconv2(de)
-        de = self.batchNorm16(de)
-        de = self.tan(de)
-        de = self.deconv3(de)
-        decoded = self.sig(de)
+        # en = self.connv1(x)
+        # en = self.batchNorm16(en)
+        # en = self.tan(en)
+        # en = self.connv2(en)
+        # en = self.batchNorm32(en)
+        # en = self.tan(en)
+        # en = self.connv3(en)
+        # en = self.batchNorm16(en)
+        # en = self.tan(en)
+        #
+        # code = self.en_fc(en.view(en.size(0), -1))
+        # de = self.de_fc(code)
+        #
+        # de = self.deconv1(de.view(de.size(0), 16, 54 , 54))
+        # de = self.batchNorm32(de)
+        # de = self.tan(de)
+        # de = self.deconv2(de)
+        # de = self.batchNorm16(de)
+        # de = self.tan(de)
+        # de = self.deconv3(de)
+        # decoded = self.sig(de)
+        decoded = self.input_to_hidden1(x)
         return code, decoded
 
 
-net = AutoEncoder()
+latent_length = 30
+input_size = 224 * 224
+hidden1 = 128
+hidden2 = 128
+hidden3 = 64
+hidden4 = 64
+# net = Autoencoder(input_size, hidden1, hidden2, hidden3, hidden4, latent_length)
+net=AutoEncoder()
 input = torch.Tensor(64, 1, 224, 224)
 print(input.size())
 code, output = net(input)

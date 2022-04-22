@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-# @Time : 2021/12/9 17:45
-# @Author : XingZhou
-# @Email : 329201962@qq.com
+# @Description：
+# @Author：XingZhou
+# @Time：2022/4/22 17:33
+# @Email：329201962@qq.com
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from dataset_loaders import WaterPipeData
-from deep_auto_encoder import AutoEncoder
 
 root_dir = 'data/noise_after'
 train_dir = 'threshold'
@@ -18,7 +18,7 @@ BATCH_SIZE = 1
 train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
-net = torch.load("./model/noise_deep_auto_encoder_epoch3000_batch64.pth")
+net = torch.load("./model/noise_vae_auto_encoder_epoch3000_batch64.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
@@ -32,10 +32,11 @@ loss_set = []
 net.eval()
 for step, (x, _) in enumerate(train_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 224, 224)))
+        x = torch.reshape(x, ((1, 1, 224*224)))
         data.resize_(x.size()).copy_(x)
-        code, decoded = net(data)
-        loss = loss_f(decoded, data)
+        decoded , latent, latent_mean, latent_logvar = net(data)
+        kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
+        loss = loss_f(decoded, data) + kl_loss
         loss_set.append(loss.cpu().detach().numpy())
         if step % 10 == 0:
             print("-------------process:{:.0f}%-------------".format(100. * step / len(train_dataset)))
@@ -45,5 +46,5 @@ avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
 threshold = avgloss + 3 * stdloss
-np.save('./model/threshold.npy', threshold)
+np.save('./model/threshold_vae.npy', threshold)
 print("std:{} avg:{} max:{} min:{} threshold:{}".format(stdloss, avgloss, maxloss, minloss, threshold))

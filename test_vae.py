@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-# @Time : 2021/12/8 19:08
-# @Author : XingZhou
-# @Email : 329201962@qq.com
+# @Description：
+# @Author：XingZhou
+# @Time：2022/4/22 17:39
+# @Email：329201962@qq.com
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
 from dataset_loaders import  WaterPipeData
-from deep_auto_encoder import AutoEncoder
 from torch.autograd import Variable
 
 BATCH_SIZE = 1
 root_dir = 'data/noise_after'
 test_dir = 'test'
-threshold = np.load('./model/threshold.npy')
+threshold = np.load('./model/threshold_vae.npy')
 test_dataset = WaterPipeData(root_dir, test_dir)
 test_loader = DataLoader(test_dataset, BATCH_SIZE)
-model = torch.load("./model/noise_deep_auto_encoder_epoch3000_batch64.pth")
+model = torch.load("./model/noise_deep_vae_encoder_epoch3000_batch64.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
@@ -41,10 +41,11 @@ outputs = []
 loss_set = []
 for step, (x, tag) in enumerate(test_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 224, 224)))
+        x = torch.reshape(x, ((1, 1, 224*224)))
         data.resize_(x.size()).copy_(x)
-        code, decoded = net(data)
-        loss = loss_f(decoded, data)
+        decoded , latent, latent_mean, latent_logvar = net(data)
+        kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
+        loss = loss_f(decoded, data) + kl_loss
         loss = loss.cpu().detach().numpy()
         loss_set.append(loss)
         output = ""
