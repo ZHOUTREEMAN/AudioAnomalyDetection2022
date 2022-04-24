@@ -2,12 +2,15 @@
 # @Time : 2021/12/9 17:45
 # @Author : XingZhou
 # @Email : 329201962@qq.com
+import matplotlib
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from dataset_loaders import WaterPipeData
-from deep_auto_encoder import AutoEncoder
+import seaborn as sns
+matplotlib.use('Agg')
 
 root_dir = 'data/noise_after'
 train_dir = 'threshold'
@@ -45,5 +48,14 @@ avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
 threshold = avgloss + 1 * stdloss
+plt.figure(figsize=(12, 6))
+sns.distplot(loss_set, bins=50, hist=True, kde=True, norm_hist=False,
+             rug=True, vertical=False, label='normal noise',
+             axlabel='loss', rug_kws={'label': 'RUG', 'color': 'b'},
+             kde_kws={'label': 'KDE', 'color': 'g', 'linestyle': '--'},
+             hist_kws={'color': 'g'})
+plt.axvline(threshold, color='r', label='threshold:' + str(threshold))
+plt.legend()
+plt.savefig('./model/threshold.png')
 np.save('./model/threshold.npy', threshold)
 print("std:{} avg:{} max:{} min:{} threshold:{}".format(stdloss, avgloss, maxloss, minloss, threshold))

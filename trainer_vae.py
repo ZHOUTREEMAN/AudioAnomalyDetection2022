@@ -22,7 +22,7 @@ root_dir = 'data/noise_after'
 train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
-BATCH_SIZE = 64
+BATCH_SIZE = 199
 LR = 0.000001
 EPOCHS = 3000
 
@@ -50,14 +50,14 @@ loss_f = nn.MSELoss()
 if torch.cuda.is_available():
     loss_f = loss_f.cuda()
 
-summary(net, input_size=(1, 224 * 224), batch_size=64, device="cuda")
+summary(net, input_size=(1, input_size), batch_size=64, device="cuda")
 Loss_list_epoch = []
 
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
     for step, (x, _) in enumerate(train_loader, 1):
-        x = torch.reshape(x, ((64, 1, 224 * 224)))
+        x = torch.reshape(x, ((BATCH_SIZE, 1, input_size)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
         decoded , latent, latent_mean, latent_logvar= net(data)

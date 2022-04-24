@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
-# @Description：
+# @Description：获取阈值，并对误差分布进行绘图
 # @Author：XingZhou
 # @Time：2022/4/22 17:33
 # @Email：329201962@qq.com
+import matplotlib
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from dataset_loaders import WaterPipeData
+import seaborn as sns
+matplotlib.use('Agg')
 
 root_dir = 'data/noise_after'
 train_dir = 'threshold'
@@ -32,9 +36,9 @@ loss_set = []
 net.eval()
 for step, (x, _) in enumerate(train_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 224*224)))
+        x = torch.reshape(x, ((1, 1, 224 * 224)))
         data.resize_(x.size()).copy_(x)
-        decoded , latent, latent_mean, latent_logvar = net(data)
+        decoded, latent, latent_mean, latent_logvar = net(data)
         kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
         loss = loss_f(decoded, data) + kl_loss
         loss_set.append(loss.cpu().detach().numpy())
@@ -46,5 +50,14 @@ avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
 threshold = avgloss + 1 * stdloss
+plt.figure(figsize=(12, 6))
+sns.distplot(loss_set, bins=50, hist=True, kde=True, norm_hist=False,
+             rug=True, vertical=False, label='normal noise',
+             axlabel='loss', rug_kws={'label': 'RUG', 'color': 'b'},
+             kde_kws={'label': 'KDE', 'color': 'g', 'linestyle': '--'},
+             hist_kws={'color': 'g'})
+plt.axvline(threshold, color='r', label='threshold:' + str(threshold))
+plt.legend()
+plt.savefig('./model/threshold_vae.png')
 np.save('./model/threshold_vae.npy', threshold)
 print("std:{} avg:{} max:{} min:{} threshold:{}".format(stdloss, avgloss, maxloss, minloss, threshold))
