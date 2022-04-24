@@ -44,6 +44,6 @@ stdloss = np.std(loss_set)
 avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
-threshold = avgloss + 3 * stdloss
+threshold = avgloss + 1 * stdloss
 np.save('./model/threshold.npy', threshold)
 print("std:{} avg:{} max:{} min:{} threshold:{}".format(stdloss, avgloss, maxloss, minloss, threshold))

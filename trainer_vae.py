@@ -23,14 +23,14 @@ train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 64
-LR = 0.001
+LR = 0.000001
 EPOCHS = 3000
 
 latent_length = 30
 input_size = 224 * 224
-hidden1 = 128
-hidden2 = 128
-hidden3 = 64
+hidden1 = 512
+hidden2 = 256
+hidden3 = 128
 hidden4 = 64
 
 train_dataset = WaterPipeData(root_dir, train_dir)

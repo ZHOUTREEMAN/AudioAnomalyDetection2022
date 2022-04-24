@@ -63,4 +63,4 @@ accuracy = 100. * correct / len(test_dataset)
 print("total accuracy:{:.2f}%".format(accuracy))
 dataframe = pd.DataFrame(
     {'tag': tags, 'output': outputs, 'loss': loss_set, 'threshold': threshold, 'accuracy(%)': accuracy})
-dataframe.to_csv("./result/result.csv", index=False, sep=',')
+dataframe.to_csv("./result/result_deep.csv", index=False, sep=',')
