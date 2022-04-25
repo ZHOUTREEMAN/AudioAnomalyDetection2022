@@ -56,13 +56,13 @@ Loss_list_epoch = []
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
-    for step, (x, _) in enumerate(train_loader, 1):
+    for step, (x, _, _) in enumerate(train_loader, 1):
         x = torch.reshape(x, ((BATCH_SIZE, 1, input_size)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
-        decoded , latent, latent_mean, latent_logvar= net(data)
+        decoded, latent, latent_mean, latent_logvar = net(data)
         kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
-        loss = loss_f(decoded, data)+kl_loss
+        loss = loss_f(decoded, data) + kl_loss
         print("----------------epoch:{} step:{} loss:{}----------------".format(epoch, step, loss))
         loss.backward()
         optimizer.step()
@@ -79,6 +79,3 @@ plt.ylabel('loss')
 plt.savefig("./log/loss_all_vae.jpg")
 print("task over,saving model......")
 torch.save(net, "./model/noise_vae_auto_encoder_epoch{}_batch{}.pth".format(EPOCHS, BATCH_SIZE))
-
-
-

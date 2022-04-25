@@ -3,6 +3,8 @@
 # @Author：XingZhou
 # @Time：2022/4/22 17:39
 # @Email：329201962@qq.com
+import os
+
 import matplotlib
 import pandas as pd
 import torch
@@ -12,6 +14,7 @@ import numpy as np
 from dataset_loaders import WaterPipeData
 from torch.autograd import Variable
 import seaborn as sns
+
 matplotlib.use('Agg')
 
 BATCH_SIZE = 1
@@ -33,20 +36,28 @@ model.eval()
 correct = 0
 
 
-def check_tag(output, tag):
+def check_tag(output, tag, x, name):
     if output == tag:
         return 1
     else:
+        plt.axis("off")
+        plt.title(name[0] + ' : ' + tag + '---->' + output)
+        plt.imshow(x)
+        if not os.path.exists('./result/wrong_pics_vae/'):
+            os.makedirs('./result/wrong_pics_vae/')  # 创建路径
+        plt.savefig('./result/wrong_pics_vae/' + name[0] + '.png')
         return 0
 
 
+names = []
 tags = []
 outputs = []
 loss_set = []
 loss_1 = []
 loss_3 = []
-for step, (x, tag) in enumerate(test_loader, 1):
+for step, (x, tag, name) in enumerate(test_loader, 1):
     with torch.no_grad():
+        raw_x = x[0]
         x = torch.reshape(x, ((1, 1, 224 * 224)))
         data.resize_(x.size()).copy_(x)
         decoded, latent, latent_mean, latent_logvar = net(data)
@@ -54,6 +65,7 @@ for step, (x, tag) in enumerate(test_loader, 1):
         loss = loss_f(decoded, data) + kl_loss
         loss = loss.cpu().detach().numpy()
         loss_set.append(loss)
+        names.append(name[0])
         output = ""
         if loss > threshold:
             output = "3"
@@ -64,7 +76,7 @@ for step, (x, tag) in enumerate(test_loader, 1):
             loss_1.append(loss)
         else:
             loss_3.append(loss)
-        correct = correct + check_tag(output, tag)
+        correct = correct + check_tag(output, tag, raw_x, name)
         tags.append(tag)
         outputs.append(output)
         print("output:{}---tag:{}---loss:{}---threshold:{}---{}/{}".format(output, tag, loss, threshold, correct,
@@ -88,5 +100,6 @@ plt.legend()
 plt.savefig('./result/result_vae.png')
 
 dataframe = pd.DataFrame(
-    {'tag': tags, 'output': outputs, 'loss': loss_set, 'threshold': threshold, 'accuracy(%)': accuracy})
+    {'filename': names, 'tag': tags, 'output': outputs, 'loss': loss_set, 'threshold': threshold,
+     'accuracy(%)': accuracy})
 dataframe.to_csv("./result/result_vae.csv", index=False, sep=',')

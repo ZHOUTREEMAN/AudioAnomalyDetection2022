@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from dataset_loaders import WaterPipeData
 import seaborn as sns
+
 matplotlib.use('Agg')
 
 root_dir = 'data/noise_after'
@@ -33,7 +34,7 @@ if torch.cuda.is_available():
 loss_set = []
 
 net.eval()
-for step, (x, _) in enumerate(train_loader, 1):
+for step, (x, _, _) in enumerate(train_loader, 1):
     with torch.no_grad():
         x = torch.reshape(x, ((1, 1, 224, 224)))
         data.resize_(x.size()).copy_(x)

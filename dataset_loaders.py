@@ -26,7 +26,7 @@ class DcaseData(Dataset):
         stftX = librosa.stft(x)
         # 把幅度转成分贝格式
         Xdb = librosa.amplitude_to_db(abs(stftX))
-        return Xdb, data_name[:6]
+        return Xdb, data_name[:6], data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -43,7 +43,7 @@ class DcaseDataMfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.sub_dir, data_name)
         mfccs = data_input_helper.extract_feature_mfcc(data_item_path)
-        return mfccs, data_name[:6]
+        return mfccs, data_name[:6], data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -60,7 +60,7 @@ class DcaseDataGfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.sub_dir, data_name)
         gfccs = data_input_helper.extract_feature_gfcc(data_item_path)
-        return gfccs, data_name[:6]
+        return gfccs, data_name[:6], data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -82,7 +82,7 @@ class DaHenData(Dataset):
         stftX = librosa.stft(x)
         # 把幅度转成分贝格式
         Xdb = librosa.amplitude_to_db(abs(stftX))
-        return Xdb, self.label_dir
+        return Xdb, self.label_dir, data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -99,7 +99,7 @@ class DaHenDataMfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.label_dir, data_name)
         mfccs = data_input_helper.extract_feature_mfcc(data_item_path)
-        return mfccs, self.label_dir
+        return mfccs, self.label_dir, data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -116,7 +116,7 @@ class DaHenDataGfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.label_dir, data_name)
         gfccs = data_input_helper.extract_feature_gfcc(data_item_path)
-        return gfccs, self.label_dir
+        return gfccs, self.label_dir, data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -140,7 +140,7 @@ class WaterPipeData(Dataset):  # 直接将原始数据的短时傅里叶变化�
         Xdb = librosa.amplitude_to_db(abs(stftX))
         Xdb_re = cv2.resize(Xdb, (224, 224))
         Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=0)
-        return Xdb_norma, data_name[-12]
+        return Xdb_norma, data_name[-12], data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -157,7 +157,7 @@ class WaterPipeDataMfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.sub_dir, data_name)
         mfccs = data_input_helper.extract_feature_mfcc(data_item_path)
-        return mfccs, data_name[-12]
+        return mfccs, data_name[-12], data_name
 
     def __len__(self):
         return len(self.data_path)
@@ -174,7 +174,7 @@ class WaterPipeDataGfcc(Dataset):
         data_name = self.data_path[item]
         data_item_path = os.path.join(self.root_dir, self.sub_dir, data_name)
         gfccs = data_input_helper.extract_feature_gfcc(data_item_path)
-        return gfccs, data_name[-12]
+        return gfccs, data_name[-12], data_name
 
     def __len__(self):
         return len(self.data_path)

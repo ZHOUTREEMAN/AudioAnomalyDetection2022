@@ -12,6 +12,7 @@ from dataset_loaders import WaterPipeData
 from deep_auto_encoder import AutoEncoder
 from torchsummary import summary
 import matplotlib
+
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 
@@ -46,7 +47,7 @@ Loss_list_epoch = []
 for epoch in range(EPOCHS):
     Loss_list = []
     net.train()
-    for step, (x, _) in enumerate(train_loader, 1):
+    for step, (x, _, _) in enumerate(train_loader, 1):
         x = torch.reshape(x, ((64, 1, 224, 224)))
         net.zero_grad()
         data.resize_(x.size()).copy_(x)
