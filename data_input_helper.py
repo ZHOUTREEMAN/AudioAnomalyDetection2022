@@ -35,7 +35,7 @@ def load_clip(filename):
 def extract_feature_mfcc(filename):
     x, sr = load_clip(filename)
     mfccs = librosa.feature.mfcc(y=x, sr=sr, n_mfcc=44)
-    norm_mfccs = sklearn.preprocessing.scale(mfccs, axis=1)
+    norm_mfccs = sklearn.preprocessing.scale(mfccs, axis=0)
     return norm_mfccs
 
 
@@ -45,7 +45,7 @@ def extract_feature_gfcc(filename):
     x, sr = load_clip(filename)
     # compute gfccs
     gfccs = gfcc(sig=x, fs=sr, num_ceps=64)
-    norm_gfccs = sklearn.preprocessing.scale(gfccs, axis=1)
+    norm_gfccs = sklearn.preprocessing.scale(gfccs, axis=0)
     return norm_gfccs
 
 

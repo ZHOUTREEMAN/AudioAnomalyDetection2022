@@ -139,7 +139,7 @@ class WaterPipeData(Dataset):  # 直接将原始数据的短时傅里叶变化�
         # 把幅度转成分贝格式
         Xdb = librosa.amplitude_to_db(abs(stftX))
         Xdb_re = cv2.resize(Xdb, (224, 224))
-        Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=1)
+        Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=0)
         return Xdb_norma, data_name[-12]
 
     def __len__(self):

@@ -22,7 +22,7 @@ root_dir = 'data/noise_after'
 train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
-BATCH_SIZE = 199
+BATCH_SIZE = 796
 LR = 0.000001
 EPOCHS = 3000
 

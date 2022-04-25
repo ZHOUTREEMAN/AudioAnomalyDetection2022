@@ -253,18 +253,31 @@ def demo_get_anomaly():
 
 
 def demo_get_normal():
-    audio = './data/noise/1/1487-867201051535215-20220325101238-13070100.wav'
+    audio = './data/noise/3/1483-867201051536148-20220326095837-32010300.wav'
     y, sr = librosa.load(audio, sr=8000)
     y_shuffle = sequential_shuffle(y, 5)
-    plt.subplot(211)
+    plt.subplot(221)
     plt.plot(y)
     plt.title('Original waveform')
     plt.axis([0, 50000, -0.5, 0.5])
-    plt.subplot(212)
+
+    plt.subplot(222)
+    target = np.copy(y)
+    img0 = to_img2(target)
+    img0 = normalization(img0)
+    plt.imshow(img0)
+
+    plt.subplot(223)
     plt.plot(y_shuffle)
     plt.title('after sequential shuffle')
     plt.axis([0, 50000, -0.5, 0.5])
     plt.tight_layout()
+
+    plt.subplot(224)
+    target2 = np.copy(y_shuffle)
+    img1 = to_img2(target2)
+    img1 = normalization(img1)
+    plt.imshow(img1)
     plt.show()
     return
 
@@ -319,7 +332,6 @@ def demo_transfer():
     audio1 = './data/noise/1/1487-867201051535215-20220325101238-13070100.wav'
     y1, sr1 = librosa.load(audio1, sr=8000)
     target = np.copy(y1)
-    print(to_sp(target).shape)
 
     img0 = to_img2(target)
     img0 = normalization(img0)
@@ -363,5 +375,4 @@ def demo_transfer():
 
 
 if __name__ == "__main__":
-    get_anomaly2("./data/noise0418/3")
-    get_normal("./data/noise0418/1")
+    demo_get_normal()
