@@ -24,7 +24,7 @@ np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 796
 LR = 0.000001
-EPOCHS = 10000
+EPOCHS = 20000
 
 latent_length = 30
 input_size = 224 * 224
@@ -37,7 +37,7 @@ train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
 dataiter = iter(train_loader)
-inputs, labels = dataiter.next()
+inputs, labels, _ = dataiter.next()
 net = Autoencoder(input_size, hidden1, hidden2, hidden3, hidden4, latent_length)
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)

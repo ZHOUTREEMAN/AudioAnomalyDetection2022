@@ -27,7 +27,7 @@ train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 
 dataiter = iter(train_loader)
-inputs, labels = dataiter.next()
+inputs, labels, _ = dataiter.next()
 net = AutoEncoder()
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
