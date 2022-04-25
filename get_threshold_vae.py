@@ -22,7 +22,7 @@ BATCH_SIZE = 1
 train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
-net = torch.load("./model/noise_vae_auto_encoder_epoch3000_batch64.pth")
+net = torch.load("./model/noise_vae_auto_encoder_epoch3000_batch796.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()

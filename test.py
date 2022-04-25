@@ -54,7 +54,7 @@ for step, (x, tag) in enumerate(test_loader, 1):
         loss = loss.cpu().detach().numpy()
         loss_set.append(loss)
         output = ""
-        if loss > threshold:
+        if loss < threshold:
             output = "3"
         else:
             output = "1"

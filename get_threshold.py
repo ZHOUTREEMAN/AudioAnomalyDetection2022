@@ -47,7 +47,7 @@ stdloss = np.std(loss_set)
 avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
-threshold = avgloss + 1 * stdloss
+threshold = avgloss - 2.3 * stdloss
 plt.figure(figsize=(12, 6))
 sns.distplot(loss_set, bins=50, hist=True, kde=True, norm_hist=False,
              rug=True, vertical=False, label='normal noise',
