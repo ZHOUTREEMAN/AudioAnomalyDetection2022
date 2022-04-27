@@ -23,7 +23,7 @@ BATCH_SIZE = 1
 train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
-net = torch.load("./model/noise_vae_auto_encoder_epoch20000_batch796.pth")
+net = torch.load("./model/noise_vae_auto_encoder_epoch25000_batch796.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
@@ -50,7 +50,7 @@ stdloss = np.std(loss_set)
 avgloss = np.average(loss_set)
 maxloss = max(loss_set)
 minloss = min(loss_set)
-threshold = avgloss + 3 * stdloss
+threshold = avgloss + 3.4 * stdloss
 plt.figure(figsize=(12, 6))
 sns.distplot(loss_set, bins=50, hist=True, kde=True, norm_hist=False,
              rug=True, vertical=False, label='normal noise',
