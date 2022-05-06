@@ -234,4 +234,14 @@ def mobilenetv3_small(**kwargs):
 
     return MobileNetV3(cfgs, mode='small', **kwargs)
 
+if __name__ == "__main__":
+    import torch
+    from torchsummary import summary
 
+    # 需要使用device来指定网络在GPU还是CPU运行
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = mobilenetv3_large(num_classes=2).to(device)
+    summary(model, input_size=(3, 224, 224))
+
+    # # 将梅尔频谱图(灰度图)是转为为3通道RGB图
+    # spec_image = cv2.cvtColor(spec_image, cv2.COLOR_GRAY2RGB)
