@@ -97,7 +97,7 @@ def my_copyfile(srcfile, dstpath):  # 复制函数
         shutil.copy(srcfile, dstpath + fname)  # 复制文件
 
 
-def after_dataset(root, destination):  # 生成after数据集用于网络训练，其中包括三个子集合，分别为训练、测试以及阈值获取
+def after_dataset(root, destination):  # 生成after数据集用于网络训练，其中包括三个子集合，分别为训练、测试以及阈值获取,本方法也可以用于新增数据的添加，只需要将输出文件夹定为temp即可。
     data_list_1 = []
     data_list_2 = []
     data_list_3 = []
@@ -118,5 +118,5 @@ def after_dataset(root, destination):  # 生成after数据集用于网络训练�
 
 
 if __name__ == "__main__":
-    # datatrans0418(r'./data/mark/label0418.xlsx', './data/noise0418')
-    after_dataset('./data/noise0418', './data/noise_after')
+    # datatrans0418(r'./data/mark/label0426.xls', './data/noise0426')
+    after_dataset('./data/noise0426', './data/temp')

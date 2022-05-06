@@ -24,7 +24,7 @@ np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 796
 LR = 0.000001
-EPOCHS = 25000
+EPOCHS = 30000
 
 latent_length = 30
 input_size = 224 * 224
