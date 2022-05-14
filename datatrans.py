@@ -118,5 +118,5 @@ def after_dataset(root, destination):  # 生成after数据集用于网络训练�
 
 
 if __name__ == "__main__":
-    # datatrans0418(r'./data/mark/label0426.xls', './data/noise0426')
-    after_dataset('./data/noise0426', './data/temp')
+    # datatrans0418(r'./data/mark/label0509.xls', './data/noise0509')
+    after_dataset('./data/noise0509', './data/temp')

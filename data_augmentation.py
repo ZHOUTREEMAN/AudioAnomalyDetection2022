@@ -376,4 +376,4 @@ def demo_transfer():
 
 if __name__ == "__main__":
     # demo_get_normal()
-    get_normal("./data/noise0426/1")
+    get_normal("./data/noise0509/1")

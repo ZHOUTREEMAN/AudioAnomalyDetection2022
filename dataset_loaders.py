@@ -3,6 +3,7 @@
 # @Author : XingZhou
 # @Email : 329201962@qq.com
 import cv2
+import numpy as np
 import sklearn
 from torch.utils.data.dataset import Dataset
 import os
@@ -141,6 +142,31 @@ class WaterPipeData(Dataset):  # 直接将原始数据的短时傅里叶变化�
         Xdb_re = cv2.resize(Xdb, (224, 224))
         Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=0)
         return Xdb_norma, data_name[-12], data_name
+
+    def __len__(self):
+        return len(self.data_path)
+
+
+class WaterPipeDataForFE(Dataset):  # 直接将原始数据的短时傅里叶变化后直接作为网络输入
+    def __init__(self, root_dir, sub_dir):
+        self.root_dir = root_dir
+        self.sub_dir = sub_dir
+        self.path = os.path.join(self.root_dir, self.sub_dir)
+        self.data_path = os.listdir(self.path)
+
+    def __getitem__(self, item):
+        data_name = self.data_path[item]
+        data_item_path = os.path.join(self.root_dir, self.sub_dir, data_name)
+        x, sr = data_input_helper.load_clip(data_item_path)
+        # 时变频谱图
+        # 调用librosa的stft方法可以直接得到短时傅里叶变换的结果
+        stftX = librosa.stft(x, n_fft=512, hop_length=256)
+        # 把幅度转成分贝格式
+        Xdb = librosa.amplitude_to_db(abs(stftX))
+        Xdb_re = cv2.resize(Xdb, (224, 224))
+        Xdb_norma = sklearn.preprocessing.scale(Xdb_re, axis=0)
+        Xdb_3v =np.array([Xdb_norma, Xdb_norma, Xdb_norma])
+        return Xdb_3v, data_name[-12], data_name
 
     def __len__(self):
         return len(self.data_path)
