@@ -23,7 +23,9 @@ test_dir = 'test'
 threshold = np.load('./model/threshold_vae.npy')
 test_dataset = WaterPipeData(root_dir, test_dir)
 test_loader = DataLoader(test_dataset, BATCH_SIZE)
-model = torch.load("./model/noise_vae_auto_encoder_epoch30000_batch796.pth")
+print(test_dataset.__len__())
+
+model = torch.load("./model/noise_vae_auto_encoder_epoch40000_batch967.pth")
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()

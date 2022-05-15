@@ -22,9 +22,9 @@ root_dir = 'data/noise_after'
 train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
-BATCH_SIZE = 796
+BATCH_SIZE = 967
 LR = 0.000001
-EPOCHS = 30000
+EPOCHS = 40000
 
 latent_length = 30
 input_size = 224 * 224
@@ -35,6 +35,7 @@ hidden4 = 64
 
 train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
+print(train_dataset.__len__())
 
 dataiter = iter(train_loader)
 inputs, labels, _ = dataiter.next()
