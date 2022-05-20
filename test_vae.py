@@ -11,22 +11,28 @@ import torch
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 import numpy as np
-from dataset_loaders import WaterPipeData
+from dataset_loaders import WaterPipeData, WaterPipeDataMfcc
 from torch.autograd import Variable
 import seaborn as sns
 
 matplotlib.use('Agg')
 
-BATCH_SIZE = 1
+""" feature:{t-f,mfcc,gfcc,cnn}"""
+feature = 'mfcc'
 root_dir = 'data/noise_after'
 test_dir = 'test'
-threshold = np.load('./model/threshold_vae.npy')
-test_dataset = WaterPipeData(root_dir, test_dir)
-test_loader = DataLoader(test_dataset, BATCH_SIZE)
+threshold = np.load('./model/threshold_{}_vae.npy'.format(feature))
+if feature == 't-f':
+    input_size = 224 * 224
+    test_dataset = WaterPipeData(root_dir, test_dir)
+elif feature == 'mfcc':
+    input_size = 44 * 86
+    test_dataset = WaterPipeDataMfcc(root_dir, test_dir)
+test_loader = DataLoader(test_dataset, 1)
 print(test_dataset.__len__())
 
-model = torch.load("./model/noise_vae_auto_encoder_epoch40000_batch967.pth")
-data = torch.Tensor(BATCH_SIZE, 28 * 28)
+model = torch.load("./model/noise_{}_vae_auto_encoder_epoch40000_batch967.pth".format(feature))
+data = torch.Tensor(1, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
 if torch.cuda.is_available():
@@ -45,9 +51,9 @@ def check_tag(output, tag, x, name):
         plt.axis("off")
         plt.title(name[0] + ' : ' + tag + '---->' + output)
         plt.imshow(x)
-        if not os.path.exists('./result/wrong_pics_vae/'):
-            os.makedirs('./result/wrong_pics_vae/')  # 创建路径
-        plt.savefig('./result/wrong_pics_vae/' + name[0] + '.png')
+        if not os.path.exists('./result/wrong_pics_{}_vae/'.format(feature)):
+            os.makedirs('./result/wrong_pics_{}_vae/'.format(feature))  # 创建路径
+        plt.savefig('./result/wrong_pics_{}_vae/'.format(feature) + name[0] + '.png')
         return 0
 
 
@@ -60,7 +66,7 @@ loss_3 = []
 for step, (x, tag, name) in enumerate(test_loader, 1):
     with torch.no_grad():
         raw_x = x[0]
-        x = torch.reshape(x, ((1, 1, 224 * 224)))
+        x = torch.reshape(x, ((1, 1, input_size)))
         data.resize_(x.size()).copy_(x)
         decoded, latent, latent_mean, latent_logvar = net(data)
         kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
@@ -99,9 +105,9 @@ sns.distplot(loss_3, bins=50, hist=True, kde=True, norm_hist=False,
              hist_kws={'color': 'k'})
 plt.axvline(threshold, color='r', label='threshold:' + str(threshold))
 plt.legend()
-plt.savefig('./result/result_vae.png')
+plt.savefig('./result/result_{}_vae.png'.format(feature))
 
 dataframe = pd.DataFrame(
     {'filename': names, 'tag': tags, 'output': outputs, 'loss': loss_set, 'threshold': threshold,
      'accuracy(%)': accuracy})
-dataframe.to_csv("./result/result_vae.csv", index=False, sep=',')
+dataframe.to_csv("./result/result_{}_vae.csv".format(feature), index=False, sep=',')

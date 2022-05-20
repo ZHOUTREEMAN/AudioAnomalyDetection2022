@@ -13,7 +13,6 @@ arXiv preprint arXiv:1905.02244.
 import torch.nn as nn
 import math
 
-
 __all__ = ['mobilenetv3_large', 'mobilenetv3_small']
 
 
@@ -60,10 +59,10 @@ class SELayer(nn.Module):
         super(SELayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-                nn.Linear(channel, _make_divisible(channel // reduction, 8)),
-                nn.ReLU(inplace=True),
-                nn.Linear(_make_divisible(channel // reduction, 8), channel),
-                h_sigmoid()
+            nn.Linear(channel, _make_divisible(channel // reduction, 8)),
+            nn.ReLU(inplace=True),
+            nn.Linear(_make_divisible(channel // reduction, 8), channel),
+            h_sigmoid()
         )
 
     def forward(self, x):
@@ -99,7 +98,8 @@ class InvertedResidual(nn.Module):
         if inp == hidden_dim:
             self.conv = nn.Sequential(
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, kernel_size, stride, (kernel_size - 1) // 2, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, kernel_size, stride, (kernel_size - 1) // 2, groups=hidden_dim,
+                          bias=False),
                 nn.BatchNorm2d(hidden_dim),
                 h_swish() if use_hs else nn.ReLU(inplace=True),
                 # Squeeze-and-Excite
@@ -115,7 +115,8 @@ class InvertedResidual(nn.Module):
                 nn.BatchNorm2d(hidden_dim),
                 h_swish() if use_hs else nn.ReLU(inplace=True),
                 # dw
-                nn.Conv2d(hidden_dim, hidden_dim, kernel_size, stride, (kernel_size - 1) // 2, groups=hidden_dim, bias=False),
+                nn.Conv2d(hidden_dim, hidden_dim, kernel_size, stride, (kernel_size - 1) // 2, groups=hidden_dim,
+                          bias=False),
                 nn.BatchNorm2d(hidden_dim),
                 # Squeeze-and-Excite
                 SELayer(hidden_dim) if use_se else nn.Identity(),
@@ -154,7 +155,8 @@ class MobileNetV3(nn.Module):
         self.conv = conv_1x1_bn(input_channel, exp_size)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         output_channel = {'large': 1280, 'small': 1024}
-        output_channel = _make_divisible(output_channel[mode] * width_mult, 8) if width_mult > 1.0 else output_channel[mode]
+        output_channel = _make_divisible(output_channel[mode] * width_mult, 8) if width_mult > 1.0 else output_channel[
+            mode]
         self.classifier = nn.Sequential(
             nn.Linear(exp_size, output_channel),
             h_swish(),
@@ -167,10 +169,11 @@ class MobileNetV3(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = self.conv(x)
+        outfeatures = x
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
-        return x
+        return x, outfeatures
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -194,21 +197,21 @@ def mobilenetv3_large(**kwargs):
     """
     cfgs = [
         # k, t, c, SE, HS, s
-        [3,   1,  16, 0, 0, 1],
-        [3,   4,  24, 0, 0, 2],
-        [3,   3,  24, 0, 0, 1],
-        [5,   3,  40, 1, 0, 2],
-        [5,   3,  40, 1, 0, 1],
-        [5,   3,  40, 1, 0, 1],
-        [3,   6,  80, 0, 1, 2],
-        [3, 2.5,  80, 0, 1, 1],
-        [3, 2.3,  80, 0, 1, 1],
-        [3, 2.3,  80, 0, 1, 1],
-        [3,   6, 112, 1, 1, 1],
-        [3,   6, 112, 1, 1, 1],
-        [5,   6, 160, 1, 1, 2],
-        [5,   6, 160, 1, 1, 1],
-        [5,   6, 160, 1, 1, 1]
+        [3, 1, 16, 0, 0, 1],
+        [3, 4, 24, 0, 0, 2],
+        [3, 3, 24, 0, 0, 1],
+        [5, 3, 40, 1, 0, 2],
+        [5, 3, 40, 1, 0, 1],
+        [5, 3, 40, 1, 0, 1],
+        [3, 6, 80, 0, 1, 2],
+        [3, 2.5, 80, 0, 1, 1],
+        [3, 2.3, 80, 0, 1, 1],
+        [3, 2.3, 80, 0, 1, 1],
+        [3, 6, 112, 1, 1, 1],
+        [3, 6, 112, 1, 1, 1],
+        [5, 6, 160, 1, 1, 2],
+        [5, 6, 160, 1, 1, 1],
+        [5, 6, 160, 1, 1, 1]
     ]
     return MobileNetV3(cfgs, mode='large', **kwargs)
 
@@ -219,20 +222,21 @@ def mobilenetv3_small(**kwargs):
     """
     cfgs = [
         # k, t, c, SE, HS, s
-        [3,    1,  16, 1, 0, 2],
-        [3,  4.5,  24, 0, 0, 2],
-        [3, 3.67,  24, 0, 0, 1],
-        [5,    4,  40, 1, 1, 2],
-        [5,    6,  40, 1, 1, 1],
-        [5,    6,  40, 1, 1, 1],
-        [5,    3,  48, 1, 1, 1],
-        [5,    3,  48, 1, 1, 1],
-        [5,    6,  96, 1, 1, 2],
-        [5,    6,  96, 1, 1, 1],
-        [5,    6,  96, 1, 1, 1],
+        [3, 1, 16, 1, 0, 2],
+        [3, 4.5, 24, 0, 0, 2],
+        [3, 3.67, 24, 0, 0, 1],
+        [5, 4, 40, 1, 1, 2],
+        [5, 6, 40, 1, 1, 1],
+        [5, 6, 40, 1, 1, 1],
+        [5, 3, 48, 1, 1, 1],
+        [5, 3, 48, 1, 1, 1],
+        [5, 6, 96, 1, 1, 2],
+        [5, 6, 96, 1, 1, 1],
+        [5, 6, 96, 1, 1, 1],
     ]
 
     return MobileNetV3(cfgs, mode='small', **kwargs)
+
 
 if __name__ == "__main__":
     import torch

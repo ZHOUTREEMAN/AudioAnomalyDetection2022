@@ -9,7 +9,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 import numpy as np
-from dataset_loaders import WaterPipeData
+from dataset_loaders import WaterPipeData, WaterPipeDataMfcc
 from torchsummary import summary
 import matplotlib
 
@@ -18,6 +18,8 @@ from variational_auto_encoder import Autoencoder
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 
+""" feature:{t-f,mfcc,gfcc,cnn}"""
+feature = 'mfcc'
 root_dir = 'data/noise_after'
 train_dir = 'train'
 np.random.seed(123)
@@ -27,18 +29,22 @@ LR = 0.000001
 EPOCHS = 40000
 
 latent_length = 30
-input_size = 224 * 224
+if feature == 't-f':
+    input_size = 224 * 224
+    train_dataset = WaterPipeData(root_dir, train_dir)
+elif feature == 'mfcc':
+    input_size = 44 * 86
+    train_dataset = WaterPipeDataMfcc(root_dir, train_dir)
 hidden1 = 512
 hidden2 = 256
 hidden3 = 128
 hidden4 = 64
-
-train_dataset = WaterPipeData(root_dir, train_dir)
 train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
 print(train_dataset.__len__())
 
 dataiter = iter(train_loader)
 inputs, labels, _ = dataiter.next()
+print(np.shape(inputs))
 net = Autoencoder(input_size, hidden1, hidden2, hidden3, hidden4, latent_length)
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
@@ -77,6 +83,6 @@ plt_title = 'EPOCHS = {}; BATCH_SIZE = {}; LEARNING_RATE:{}'.format(EPOCHS, BATC
 plt.title(plt_title)
 plt.xlabel('per epoch')
 plt.ylabel('loss')
-plt.savefig("./log/loss_all_vae.jpg")
+plt.savefig("./log/loss_all_{}_vae.jpg".format(feature))
 print("task over,saving model......")
-torch.save(net, "./model/noise_vae_auto_encoder_epoch{}_batch{}.pth".format(EPOCHS, BATCH_SIZE))
+torch.save(net, "./model/noise_{}_vae_auto_encoder_epoch{}_batch{}.pth".format(feature, EPOCHS, BATCH_SIZE))

@@ -64,11 +64,12 @@ class MobileNetV1(nn.Module):
         x = self.stage1(x)
         x = self.stage2(x)
         x = self.stage3(x)
+        outfeatures = x
         x = self.avg(x)
         # x = self.model(x)
         x = x.view(-1, 1024)
         x = self.fc(x)
-        return x
+        return x, outfeatures
 
 
 def mobilenet_v1(pretrained=False, progress=True):

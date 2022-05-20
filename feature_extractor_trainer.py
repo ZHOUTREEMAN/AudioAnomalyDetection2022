@@ -48,7 +48,7 @@ def train(model_type, train_loader, BATCH_SIZE, EPOCHS, LR):
                 y = y.cuda()
             net.zero_grad()
             data.resize_(x.size()).copy_(x)
-            out = net(data)
+            out, _ = net(data)
             pred = torch.argmax(out, dim=1)
             # precision = y.eq(pred).sum().float().item()
             precision = torch.eq(y, pred).sum().float().item()
@@ -87,7 +87,7 @@ def test(test_loader, DATA_SIZE, BATCH_SIZE, EPOCHS):  # 使用测试集进行�
         if torch.cuda.is_available():
             y = y.cuda()
         data.resize_(x.size()).copy_(x)
-        out = net(data)
+        out, _ = net(data)
         pred = torch.argmax(out, dim=1)
         total_correct += torch.eq(y, pred).sum().float().item()
     acc = total_correct / DATA_SIZE
@@ -103,11 +103,11 @@ if __name__ == "__main__":
     torch.manual_seed(123)
     BATCH_SIZE = 2
     LR = 0.0005
-    EPOCHS = 1
+    EPOCHS = 10
     train_dataset = WaterPipeDataForFE(root_dir, train_dir)
     test_dataset = WaterPipeDataForFE(root_dir, test_dir)
     train_loader = DataLoader(train_dataset, BATCH_SIZE, True, drop_last=True)
     test_loader = DataLoader(test_dataset, 1)
 
-    # train('v3', train_loader, BATCH_SIZE, EPOCHS, LR)
+    train('v3', train_loader, BATCH_SIZE, EPOCHS, LR)
     test(train_loader, train_dataset.__len__(), BATCH_SIZE, EPOCHS)

@@ -117,11 +117,11 @@ class MobileNetV2(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
+        outfeatures = x
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
-        return x
-
+        return x, outfeatures
 
 # net = MobileNetV2(num_classes=5)
 # # load pretrain weights
