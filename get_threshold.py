@@ -8,21 +8,30 @@ import torch
 from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
-from dataset_loaders import WaterPipeData
+from dataset_loaders import WaterPipeData, WaterPipeDataMfcc
 import seaborn as sns
 
 matplotlib.use('Agg')
-
+""" feature:{t-f,mfcc,gfcc,cnn}"""
+feature = 't-f'
 root_dir = 'data/noise_after'
 train_dir = 'threshold'
 np.random.seed(123)
 torch.manual_seed(123)
 BATCH_SIZE = 1
 
-train_dataset = WaterPipeData(root_dir, train_dir)
+if feature == 't-f':
+    input_size1 = 224
+    input_size2 = 224
+    train_dataset = WaterPipeData(root_dir, train_dir)
+elif feature == 'mfcc':
+    input_size1 = 44
+    input_size2 = 86
+    train_dataset = WaterPipeDataMfcc(root_dir, train_dir)
+
 train_loader = DataLoader(train_dataset, BATCH_SIZE)
 
-net = torch.load("./model/noise_deep_auto_encoder_epoch3000_batch64.pth")
+net = torch.load("./model/noise_{}_deep_auto_encoder_epoch3000_batch64.pth".format(feature))
 data = torch.Tensor(BATCH_SIZE, 28 * 28)
 data = Variable(data)
 loss_f = torch.nn.MSELoss()
@@ -36,7 +45,7 @@ loss_set = []
 net.eval()
 for step, (x, _, _) in enumerate(train_loader, 1):
     with torch.no_grad():
-        x = torch.reshape(x, ((1, 1, 224, 224)))
+        x = torch.reshape(x, ((1, 1, input_size1, input_size2)))
         data.resize_(x.size()).copy_(x)
         code, decoded = net(data)
         loss = loss_f(decoded, data)
@@ -57,6 +66,6 @@ sns.distplot(loss_set, bins=50, hist=True, kde=True, norm_hist=False,
              hist_kws={'color': 'g'})
 plt.axvline(threshold, color='r', label='threshold:' + str(threshold))
 plt.legend()
-plt.savefig('./model/threshold.png')
-np.save('./model/threshold.npy', threshold)
+plt.savefig('./model/threshold_{}_deep.png'.format(feature))
+np.save('./model/threshold_{}_deep.npy'.format(feature), threshold)
 print("std:{} avg:{} max:{} min:{} threshold:{}".format(stdloss, avgloss, maxloss, minloss, threshold))
