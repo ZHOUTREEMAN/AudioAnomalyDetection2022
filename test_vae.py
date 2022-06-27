@@ -18,7 +18,7 @@ import seaborn as sns
 matplotlib.use('Agg')
 
 """ feature:{t-f,mfcc,gfcc,cnn}"""
-feature = 'mfcc'
+feature = 't-f'
 root_dir = 'data/noise_after'
 test_dir = 'test'
 threshold = np.load('./model/threshold_{}_vae.npy'.format(feature))

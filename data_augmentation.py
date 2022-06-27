@@ -376,4 +376,4 @@ def demo_transfer():
 
 if __name__ == "__main__":
     # demo_get_normal()
-    get_normal("./data/noise0509/1")
+    get_anomaly2("./data/新增异常0623")
