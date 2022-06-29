@@ -39,11 +39,11 @@
 
 
 
-![](model\threshold_t-f_vae.png)
+![](model/threshold_t-f_vae.png)
 
 <center>Figure: get threshold</center>
 
-![](result\result_t-f_vae.png)
+![](result/result_t-f_vae.png)
 
 <center>Figure: result</center>
 
