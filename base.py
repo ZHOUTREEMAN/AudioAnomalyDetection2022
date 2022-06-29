@@ -1,5 +1,6 @@
-from .types_ import *
-from torch import nn
+from typing import Any, List
+
+from torch import nn, Tensor
 from abc import abstractmethod
 
 class BaseVAE(nn.Module):
