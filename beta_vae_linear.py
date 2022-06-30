@@ -28,37 +28,31 @@ class BetaVAE(BaseVAE):
         self.C_max = torch.Tensor([max_capacity])
         self.C_stop_iter = Capacity_max_iter
 
-        modules = []
         if hidden_dims is None:
             hidden_dims = [512, 256, 128, 64]
         output_size = in_channels
 
         # Build Encoder
-        for h_dim in hidden_dims:
-            modules.append(
-                nn.ReLU(nn.Linear(in_channels, h_dim))
-            )
-            in_channels = h_dim
-
-        self.encoder = nn.Sequential(*modules)
-        self.fc_mu = nn.Linear(hidden_dims[-1], latent_dim)
-        self.fc_var = nn.Linear(hidden_dims[-1], latent_dim)
+        self.input_to_hidden1 = nn.Linear(in_channels, hidden_dims[0])
+        self.hidden1_to_hidden2 = nn.Linear(hidden_dims[0], hidden_dims[1])
+        self.hidden2_to_hidden3 = nn.Linear(hidden_dims[1], hidden_dims[2])
+        self.hidden3_to_hidden4 = nn.Linear(hidden_dims[2], hidden_dims[3])
+        self.ReLU = nn.ReLU()
+        self.Sigmoid = nn.Sigmoid()
+        self.fc_mu = nn.Linear(hidden_dims[3], latent_dim)
+        self.fc_var = nn.Linear(hidden_dims[3], latent_dim)
+        nn.init.xavier_uniform_(self.fc_mu.weight)  # 为了通过网络层时，输入和输出的方差相同 服从均匀分布
+        nn.init.xavier_uniform_(self.fc_var.weight)  # 为了通过网络层时，输入和输出的方差相同
 
         # Build Decoder
-        modules = []
+        self.latent_to_hidden4 = nn.Linear(latent_dim, hidden_dims[3])
+        self.hidden4_to_hidden3 = nn.Linear(hidden_dims[3], hidden_dims[2])
+        self.hidden3_to_hidden2 = nn.Linear(hidden_dims[2], hidden_dims[1])
+        self.hidden2_to_hidden1 = nn.Linear(hidden_dims[1], hidden_dims[0])
+        self.hidden1_to_output = nn.Linear(hidden_dims[0], output_size)
+        self.ReLU = nn.ReLU()
+        self.Sigmoid = nn.Sigmoid()
 
-        self.decoder_input = nn.Linear(latent_dim, hidden_dims[-1])
-
-        hidden_dims.reverse()
-
-        for i in range(len(hidden_dims) - 1):
-            modules.append(
-                nn.ReLU(nn.Linear(hidden_dims[i], hidden_dims[i + 1]))
-            )
-
-        self.decoder = nn.Sequential(*modules)
-
-        self.final_layer = nn.Linear(hidden_dims[-1], output_size)
 
     def encode(self, input: Tensor) -> List[Tensor]:
         """
@@ -67,19 +61,22 @@ class BetaVAE(BaseVAE):
         :param input: (Tensor) Input tensor to encoder [N x C x H x W]
         :return: (Tensor) List of latent codes
         """
-        result = self.encoder(input)
-
+        hidden1 = self.ReLU(self.input_to_hidden1(input))
+        hidden2 = self.ReLU(self.hidden1_to_hidden2(hidden1))
+        hidden3 = self.ReLU(self.hidden2_to_hidden3(hidden2))
+        hidden4 = self.ReLU(self.hidden3_to_hidden4(hidden3))
         # Split the result into mu and var components
         # of the latent Gaussian distribution
-        mu = self.fc_mu(result)
-        log_var = self.fc_var(result)
-
+        mu = self.fc_mu(hidden4)
+        log_var = self.fc_var(hidden4)
         return [mu, log_var]
 
     def decode(self, z: Tensor) -> Tensor:
-        result = self.decoder_input(z)
-        result = self.decoder(result)
-        result = self.final_layer(result)
+        hidden4 = self.ReLU(self.latent_to_hidden4(z))
+        hidden3 = self.ReLU(self.hidden4_to_hidden3(hidden4))
+        hidden2 = self.ReLU(self.hidden3_to_hidden2(hidden3))
+        hidden1 = self.ReLU(self.hidden2_to_hidden1(hidden2))
+        result = self.hidden1_to_output(hidden1)
         return result
 
     def reparameterize(self, mu: Tensor, logvar: Tensor) -> Tensor:
@@ -111,8 +108,10 @@ class BetaVAE(BaseVAE):
 
         recons_loss = F.mse_loss(recons, input)
 
-        kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)
-
+        # kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)
+        kld_loss = -0.5 * torch.mean(1 + log_var - mu.pow(2) - log_var.exp())
+        print(recons_loss)
+        print(kld_loss)
         if self.loss_type == 'H':  # https://openreview.net/forum?id=Sy2fzU9gl
             loss = recons_loss + self.beta * kld_weight * kld_loss
         elif self.loss_type == 'B':  # https://arxiv.org/pdf/1804.03599.pdf
