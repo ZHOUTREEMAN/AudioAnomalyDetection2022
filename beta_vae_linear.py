@@ -110,8 +110,6 @@ class BetaVAE(BaseVAE):
 
         # kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)
         kld_loss = -0.5 * torch.mean(1 + log_var - mu.pow(2) - log_var.exp())
-        print(recons_loss)
-        print(kld_loss)
         if self.loss_type == 'H':  # https://openreview.net/forum?id=Sy2fzU9gl
             loss = recons_loss + self.beta * kld_weight * kld_loss
         elif self.loss_type == 'B':  # https://arxiv.org/pdf/1804.03599.pdf

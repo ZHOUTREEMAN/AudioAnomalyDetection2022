@@ -21,13 +21,13 @@ import matplotlib.pyplot as plt
 
 """ feature:{t-f,mfcc,gfcc,cnn}"""
 feature = 'mfcc'
-root_dir = 'data/noise_after'
+root_dir = 'data/betavae'
 train_dir = 'train'
 np.random.seed(123)
 torch.manual_seed(123)
-BATCH_SIZE = 967
+BATCH_SIZE = 148
 LR = 0.000001
-EPOCHS = 40000
+EPOCHS = 10000
 
 latent_length = 30
 if feature == 't-f':
