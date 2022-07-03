@@ -3,7 +3,6 @@
 # @Author：XingZhou
 # @Time：2022/7/1 11:22
 # @Email：329201962@qq.com
-import os
 
 import matplotlib
 import pandas as pd
@@ -18,7 +17,7 @@ import seaborn as sns
 matplotlib.use('Agg')
 
 """ feature:{t-f,mfcc,gfcc,cnn}"""
-feature = 't-f'
+feature = 'mfcc'
 root_dir = 'data/betavae'
 test_dir = 'test'
 if feature == 't-f':
@@ -50,14 +49,16 @@ for step, (x, tag, name) in enumerate(test_loader, 1):
         x = torch.reshape(x, ((1, 1, input_size)))
         data.resize_(x.size()).copy_(x)
         results = net(data)
-        if tag == '1':
-            z_1.append(results[0])
+        if tag[0] == '1':
+            z_1.append(results[4][0][0].cpu().numpy())
         else:
-            z_3.append(results[0])
+            z_3.append(results[4][0][0].cpu().numpy())
 
 z_1 = np.array(z_1)
 z_3 = np.array(z_3)
-print(z_1.mean(axis=0))
-print(z_3.mean(axis=0))
-print(z_3-z_1)
+a=z_1.mean(axis=0)
+b=z_3.mean(axis=0)
+output=a-b
+print(output)
+np.savetxt(root_dir+'/'+'metric.txt',output,fmt='%.09f')
 

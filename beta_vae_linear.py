@@ -53,7 +53,6 @@ class BetaVAE(BaseVAE):
         self.ReLU = nn.ReLU()
         self.Sigmoid = nn.Sigmoid()
 
-
     def encode(self, input: Tensor) -> List[Tensor]:
         """
         Encodes the input by passing through the encoder network
@@ -94,7 +93,7 @@ class BetaVAE(BaseVAE):
     def forward(self, input: Tensor, **kwargs) -> Tensor:
         mu, log_var = self.encode(input)
         z = self.reparameterize(mu, log_var)
-        return [self.decode(z), input, mu, log_var]
+        return [self.decode(z), input, mu, log_var, z]
 
     def loss_function(self,
                       *args,
