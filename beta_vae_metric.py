@@ -60,5 +60,5 @@ a=z_1.mean(axis=0)
 b=z_3.mean(axis=0)
 output=a-b
 print(output)
-np.savetxt(root_dir+'/'+'metric.txt',output,fmt='%.09f')
+np.savetxt(root_dir+'/'+'metric_{}.txt'.format(feature),output,fmt='%.09f')
 

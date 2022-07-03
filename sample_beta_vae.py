@@ -42,7 +42,7 @@ outputs = []
 
 for step, (data) in enumerate(sample_list, 1):
     with torch.no_grad():
-        decoded, latent, latent_mean, latent_logvar = net(data)
+        decoded, latent, latent_mean, latent_logvar= net2(data)
         kl_loss = -0.5 * torch.mean(1 + latent_logvar - latent_mean.pow(2) - latent_logvar.exp())
         loss = loss_f(decoded, data) + kl_loss
         loss = loss.cpu().detach().numpy()
@@ -53,6 +53,6 @@ for step, (data) in enumerate(sample_list, 1):
             output = "1"
         outputs.append(output)
         print("output:{}---loss:{}---threshold:{}".format(output, loss, threshold))   
-sample_list.cpu().detach().numpy().tofile(root_dir+'/'+test_dir+'/'+'sample.dat')
+sample_list.cpu().detach().numpy().tofile(root_dir+'/'+test_dir+'/'+'sample_{}.dat'.format(feature))
 outputs = np.array(outputs)
-outputs.tofile(root_dir+'/'+test_dir+'/'+'label.dat')
+outputs.tofile(root_dir+'/'+test_dir+'/'+'label_{}.dat'.format(feature))
